@@ -10,6 +10,7 @@ interface StatCardProps {
   icon?: React.ReactNode;
   variant?: StatVariant;
   className?: string;
+  style?: React.CSSProperties;
 }
 
 export function StatCard({ 
@@ -18,24 +19,28 @@ export function StatCard({
   description, 
   icon, 
   variant = 'default',
-  className 
+  className,
+  style
 }: StatCardProps) {
   return (
-    <div className={cn(
-      "bg-card text-card-foreground border rounded-xl shadow-sm p-6 animate-scale-in",
-      {
-        "border-severity-critical/40": variant === 'critical',
-        "border-severity-high/40": variant === 'high',
-        "border-severity-medium/40": variant === 'medium',
-        "border-severity-low/40": variant === 'low',
-      },
-      className
-    )}>
+    <div 
+      className={cn(
+        "bg-card text-card-foreground border rounded-xl shadow-sm p-6 transition-all hover:shadow-md",
+        {
+          "border-severity-critical/40 hover:border-severity-critical/60": variant === 'critical',
+          "border-severity-high/40 hover:border-severity-high/60": variant === 'high',
+          "border-severity-medium/40 hover:border-severity-medium/60": variant === 'medium',
+          "border-severity-low/40 hover:border-severity-low/60": variant === 'low',
+        },
+        className
+      )}
+      style={style}
+    >
       <div className="flex justify-between items-center">
         <div>
           <p className="text-sm font-medium text-muted-foreground mb-1">{title}</p>
           <h3 className={cn(
-            "text-2xl font-semibold",
+            "text-3xl font-bold",
             {
               "text-severity-critical": variant === 'critical',
               "text-severity-high": variant === 'high',
@@ -46,12 +51,12 @@ export function StatCard({
             {value}
           </h3>
           {description && (
-            <p className="text-xs text-muted-foreground mt-1.5">{description}</p>
+            <p className="text-xs text-muted-foreground mt-2">{description}</p>
           )}
         </div>
         {icon && (
           <div className={cn(
-            "rounded-full p-2",
+            "rounded-full p-3",
             {
               "bg-severity-critical/10 text-severity-critical": variant === 'critical',
               "bg-severity-high/10 text-severity-high": variant === 'high',

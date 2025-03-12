@@ -1,5 +1,5 @@
 
-import { AlertTriangle, ShieldAlert, ShieldCheck, Package2, FileSearch } from 'lucide-react';
+import { AlertTriangle, ShieldAlert, ShieldCheck, FileSearch } from 'lucide-react';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { StatCard } from '@/components/dashboard/StatCard';
 import { SeverityPieChart } from '@/components/dashboard/SeverityPieChart';
@@ -16,44 +16,53 @@ export default function Dashboard() {
       
       <div className="flex-1 flex flex-col overflow-hidden">
         <header className="h-16 border-b flex items-center px-6">
-          <h1 className="text-xl font-semibold">Security Dashboard</h1>
+          <h1 className="text-xl font-bold">Security Dashboard</h1>
         </header>
         
-        <main className="flex-1 overflow-auto p-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <main className="flex-1 overflow-auto p-6 space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <StatCard
               title="Repositories Scanned"
               value={summaryStats.repositoriesScanned}
-              icon={<FileSearch className="h-4 w-4" />}
+              icon={<FileSearch className="h-5 w-5" />}
               description="Last scan: 2 hours ago"
+              className="animate-slide-up"
+              style={{ animationDelay: '0ms' }}
             />
             <StatCard
               title="Critical Issues"
               value={summaryStats.totalFindings.critical}
               variant="critical"
-              icon={<ShieldAlert className="h-4 w-4" />}
+              icon={<ShieldAlert className="h-5 w-5" />}
               description="Across all repositories"
+              className="animate-slide-up"
+              style={{ animationDelay: '100ms' }}
             />
             <StatCard
               title="High Issues"
               value={summaryStats.totalFindings.high}
               variant="high"
-              icon={<AlertTriangle className="h-4 w-4" />}
+              icon={<AlertTriangle className="h-5 w-5" />}
               description="Across all repositories"
+              className="animate-slide-up"
+              style={{ animationDelay: '200ms' }}
             />
             <StatCard
               title="Medium & Low Issues"
               value={summaryStats.totalFindings.medium + summaryStats.totalFindings.low}
               variant="medium"
-              icon={<ShieldCheck className="h-4 w-4" />}
+              icon={<ShieldCheck className="h-5 w-5" />}
               description="Across all repositories"
+              className="animate-slide-up"
+              style={{ animationDelay: '300ms' }}
             />
           </div>
           
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             <SeverityPieChart 
               data={summaryStats.totalFindings} 
-              className="lg:col-span-1"
+              className="lg:col-span-5 animate-fade-in"
+              style={{ animationDelay: '400ms' }}
             />
             <Chart 
               title="Vulnerability Trends Over Time"
@@ -65,11 +74,12 @@ export default function Dashboard() {
                 { name: 'Medium', key: 'medium', color: 'hsl(var(--severity-medium))' },
                 { name: 'Low', key: 'low', color: 'hsl(var(--severity-low))' },
               ]}
-              className="lg:col-span-2"
+              className="lg:col-span-7 animate-fade-in"
+              style={{ animationDelay: '500ms' }}
             />
           </div>
 
-          <div className="mb-6">
+          <div className="animate-fade-in" style={{ animationDelay: '600ms' }}>
             <RepositoryTable />
           </div>
         </main>

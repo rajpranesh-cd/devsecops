@@ -10,13 +10,13 @@ interface DashboardCardProps {
 export function DashboardCard({ title, children, className }: DashboardCardProps) {
   return (
     <div className={cn(
-      "bg-card text-card-foreground rounded-xl border shadow-sm overflow-hidden animate-scale-in",
+      "bg-card text-card-foreground rounded-xl border shadow-sm overflow-hidden transition-all duration-200 hover:shadow-md",
       className
     )}>
-      <div className="px-5 py-4 bg-muted/50 border-b">
-        <h3 className="font-medium text-sm">{title}</h3>
+      <div className="flex items-center justify-between px-6 py-4 bg-muted/30 border-b">
+        <h3 className="font-semibold">{title}</h3>
       </div>
-      <div className="p-5">
+      <div className="p-6">
         {children}
       </div>
     </div>

@@ -20,9 +20,15 @@ export function SeverityPieChart({ data, className }: SeverityPieChartProps) {
     { name: 'Low', value: data.low, color: 'hsl(var(--severity-low))' },
   ];
 
+  const totalIssues = chartData.reduce((sum, item) => sum + item.value, 0);
+
   return (
     <DashboardCard title="Vulnerabilities by Severity" className={className}>
-      <div className="h-64">
+      <div className="h-[300px] relative">
+        <div className="absolute inset-0 flex items-center justify-center flex-col">
+          <span className="text-3xl font-bold">{totalIssues}</span>
+          <span className="text-xs text-muted-foreground">Total Issues</span>
+        </div>
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie
@@ -30,43 +36,54 @@ export function SeverityPieChart({ data, className }: SeverityPieChartProps) {
               cx="50%"
               cy="50%"
               labelLine={false}
-              outerRadius={80}
-              innerRadius={50}
-              paddingAngle={2}
+              outerRadius={120}
+              innerRadius={85}
+              paddingAngle={3}
               fill="#8884d8"
               dataKey="value"
               nameKey="name"
               label={({ name, percent }) => 
-                percent > 0.05 ? `${name} ${(percent * 100).toFixed(0)}%` : ''
+                percent > 0.05 ? `${(percent * 100).toFixed(0)}%` : ''
               }
+              className="drop-shadow-sm"
             >
               {chartData.map((entry, index) => (
                 <Cell 
                   key={`cell-${index}`} 
                   fill={entry.color} 
-                  strokeWidth={1}
+                  strokeWidth={2}
                   stroke="hsl(var(--background))"
+                  className="animate-scale-in"
+                  style={{ animationDelay: `${index * 100}ms` }}
                 />
               ))}
             </Pie>
             <Tooltip 
               formatter={(value: number, name: string) => [
-                `${value} Issues`, 
+                `${value} Issues (${((value / totalIssues) * 100).toFixed(1)}%)`, 
                 name
               ]}
               contentStyle={{ 
-                borderRadius: 8,
+                borderRadius: 12,
                 border: '1px solid var(--border)',
-                backgroundColor: 'var(--background)'
+                backgroundColor: 'var(--background)',
+                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+                padding: '12px',
               }}
+              itemStyle={{ padding: '4px 0' }}
             />
             <Legend 
               layout="horizontal" 
               verticalAlign="bottom" 
               align="center"
               formatter={(value) => (
-                <span className="text-xs font-medium">{value}</span>
+                <span className="text-xs font-medium px-2">{value}</span>
               )}
+              iconSize={12}
+              iconType="circle"
+              wrapperStyle={{
+                paddingTop: '16px'
+              }}
             />
           </PieChart>
         </ResponsiveContainer>
