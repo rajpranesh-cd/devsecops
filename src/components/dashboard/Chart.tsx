@@ -7,7 +7,9 @@ import {
   CartesianGrid, 
   Tooltip, 
   Legend, 
-  ResponsiveContainer 
+  ResponsiveContainer,
+  Area,
+  ComposedChart
 } from 'recharts';
 import { DashboardCard } from './DashboardCard';
 import { cn } from '@/lib/utils';
@@ -29,7 +31,7 @@ export function Chart({ data, title, xKey, series, className }: ChartProps) {
     <DashboardCard title={title} className={cn(className)}>
       <div className="h-64">
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart
+          <ComposedChart
             data={data}
             margin={{
               top: 5,
@@ -38,17 +40,23 @@ export function Chart({ data, title, xKey, series, className }: ChartProps) {
               bottom: 5,
             }}
           >
-            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.4} />
+            <CartesianGrid 
+              strokeDasharray="3 3" 
+              stroke="hsl(var(--border))" 
+              opacity={0.4} 
+              vertical={false}
+            />
             <XAxis 
               dataKey={xKey} 
               stroke="hsl(var(--muted-foreground))" 
               tick={{ fontSize: 12 }}
-              tickLine={{ stroke: 'hsl(var(--border))' }} 
+              tickLine={{ stroke: 'hsl(var(--border))' }}
             />
             <YAxis 
               stroke="hsl(var(--muted-foreground))" 
               tick={{ fontSize: 12 }}
-              tickLine={{ stroke: 'hsl(var(--border))' }} 
+              tickLine={{ stroke: 'hsl(var(--border))' }}
+              width={40}
             />
             <Tooltip 
               contentStyle={{ 
@@ -58,22 +66,37 @@ export function Chart({ data, title, xKey, series, className }: ChartProps) {
               }}
             />
             <Legend 
-              formatter={(value, entry) => (
-                <span className="text-xs">{value}</span>
+              formatter={(value) => (
+                <span className="text-xs font-medium">{value}</span>
               )}
+              wrapperStyle={{
+                paddingTop: '8px'
+              }}
             />
             {series.map((s) => (
-              <Line
-                key={s.key}
-                type="monotone"
-                dataKey={s.key}
-                name={s.name}
-                stroke={s.color}
-                activeDot={{ r: 6 }}
-                strokeWidth={2}
-              />
+              <>
+                <Area
+                  key={`area-${s.key}`}
+                  type="monotone"
+                  dataKey={s.key}
+                  name={s.name}
+                  fill={s.color}
+                  stroke={s.color}
+                  fillOpacity={0.1}
+                />
+                <Line
+                  key={`line-${s.key}`}
+                  type="monotone"
+                  dataKey={s.key}
+                  name={s.name}
+                  stroke={s.color}
+                  strokeWidth={2}
+                  dot={{ r: 4, strokeWidth: 2 }}
+                  activeDot={{ r: 6, strokeWidth: 2 }}
+                />
+              </>
             ))}
-          </LineChart>
+          </ComposedChart>
         </ResponsiveContainer>
       </div>
     </DashboardCard>

@@ -31,16 +31,29 @@ export function SeverityPieChart({ data, className }: SeverityPieChartProps) {
               cy="50%"
               labelLine={false}
               outerRadius={80}
+              innerRadius={50}
+              paddingAngle={2}
               fill="#8884d8"
               dataKey="value"
               nameKey="name"
+              label={({ name, percent }) => 
+                percent > 0.05 ? `${name} ${(percent * 100).toFixed(0)}%` : ''
+              }
             >
               {chartData.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={entry.color} />
+                <Cell 
+                  key={`cell-${index}`} 
+                  fill={entry.color} 
+                  strokeWidth={1}
+                  stroke="hsl(var(--background))"
+                />
               ))}
             </Pie>
             <Tooltip 
-              formatter={(value: number) => [`${value} Issues`, '']}
+              formatter={(value: number, name: string) => [
+                `${value} Issues`, 
+                name
+              ]}
               contentStyle={{ 
                 borderRadius: 8,
                 border: '1px solid var(--border)',
@@ -52,7 +65,7 @@ export function SeverityPieChart({ data, className }: SeverityPieChartProps) {
               verticalAlign="bottom" 
               align="center"
               formatter={(value) => (
-                <span className="text-xs">{value}</span>
+                <span className="text-xs font-medium">{value}</span>
               )}
             />
           </PieChart>
