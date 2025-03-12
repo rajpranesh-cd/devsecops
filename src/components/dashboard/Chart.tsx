@@ -25,16 +25,17 @@ interface ChartProps {
     color: string;
   }>;
   className?: string;
+  style?: React.CSSProperties;
 }
 
-export function Chart({ data, title, xKey, series, className }: ChartProps) {
+export function Chart({ data, title, xKey, series, className, style }: ChartProps) {
   // Find the max value across all series to add a reference line
   const maxValue = Math.max(
     ...data.flatMap(item => series.map(s => item[s.key] || 0))
   );
 
   return (
-    <DashboardCard title={title} className={cn(className)}>
+    <DashboardCard title={title} className={cn(className)} style={style}>
       <div className="h-[300px]">
         <ResponsiveContainer width="100%" height="100%">
           <ComposedChart
@@ -90,8 +91,6 @@ export function Chart({ data, title, xKey, series, className }: ChartProps) {
                 boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
                 padding: '12px',
               }}
-              labelClassName="font-medium mb-2"
-              itemClassName="py-1"
               itemStyle={{ padding: '4px 0' }}
               formatter={(value: number) => [value.toLocaleString(), '']}
               labelFormatter={(label) => (

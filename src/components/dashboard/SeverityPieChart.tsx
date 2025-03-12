@@ -10,9 +10,10 @@ interface SeverityPieChartProps {
     low: number;
   };
   className?: string;
+  style?: React.CSSProperties;
 }
 
-export function SeverityPieChart({ data, className }: SeverityPieChartProps) {
+export function SeverityPieChart({ data, className, style }: SeverityPieChartProps) {
   const chartData = [
     { name: 'Critical', value: data.critical, color: 'hsl(var(--severity-critical))' },
     { name: 'High', value: data.high, color: 'hsl(var(--severity-high))' },
@@ -23,7 +24,7 @@ export function SeverityPieChart({ data, className }: SeverityPieChartProps) {
   const totalIssues = chartData.reduce((sum, item) => sum + item.value, 0);
 
   return (
-    <DashboardCard title="Vulnerabilities by Severity" className={className}>
+    <DashboardCard title="Vulnerabilities by Severity" className={className} style={style}>
       <div className="h-[300px] relative">
         <div className="absolute inset-0 flex items-center justify-center flex-col">
           <span className="text-3xl font-bold">{totalIssues}</span>
