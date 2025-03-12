@@ -34,7 +34,6 @@ export function SeverityPieChart({ data, className }: SeverityPieChartProps) {
               fill="#8884d8"
               dataKey="value"
               nameKey="name"
-              animate
             >
               {chartData.map((entry, index) => (
                 <Cell key={`cell-${index}`} fill={entry.color} />
@@ -52,7 +51,7 @@ export function SeverityPieChart({ data, className }: SeverityPieChartProps) {
               layout="horizontal" 
               verticalAlign="bottom" 
               align="center"
-              formatter={(value, entry) => (
+              formatter={(value) => (
                 <span className="text-xs">{value}</span>
               )}
             />
