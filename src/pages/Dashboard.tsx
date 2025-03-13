@@ -4,11 +4,13 @@ import { Sidebar } from '@/components/layout/Sidebar';
 import { StatCard } from '@/components/dashboard/StatCard';
 import { SeverityPieChart } from '@/components/dashboard/SeverityPieChart';
 import { RepositoryTable } from '@/components/dashboard/RepositoryTable';
-import { Chart } from '@/components/dashboard/Chart';
+import { EnhancedChart } from '@/components/dashboard/EnhancedChart';
 import { summaryStats } from '@/data/sampleData';
 
 export default function Dashboard() {
   const timelineData = summaryStats.scanTimeline;
+  const totalFindings = summaryStats.totalFindings;
+  const highPercentage = Math.round((totalFindings.high / (totalFindings.critical + totalFindings.high + totalFindings.medium + totalFindings.low)) * 100);
 
   return (
     <div className="flex h-screen w-full bg-background">
@@ -40,7 +42,7 @@ export default function Dashboard() {
             />
             <StatCard
               title="High Issues"
-              value={summaryStats.totalFindings.high}
+              value={`${summaryStats.totalFindings.high} (${highPercentage}%)`}
               variant="high"
               icon={<AlertTriangle className="h-5 w-5" />}
               description="Across all repositories"
@@ -64,16 +66,7 @@ export default function Dashboard() {
               className="lg:col-span-5 animate-fade-in"
               style={{ animationDelay: '400ms' }}
             />
-            <Chart 
-              title="Vulnerability Trends Over Time"
-              data={timelineData}
-              xKey="date"
-              series={[
-                { name: 'Critical', key: 'critical', color: 'hsl(var(--severity-critical))' },
-                { name: 'High', key: 'high', color: 'hsl(var(--severity-high))' },
-                { name: 'Medium', key: 'medium', color: 'hsl(var(--severity-medium))' },
-                { name: 'Low', key: 'low', color: 'hsl(var(--severity-low))' },
-              ]}
+            <EnhancedChart 
               className="lg:col-span-7 animate-fade-in"
               style={{ animationDelay: '500ms' }}
             />
