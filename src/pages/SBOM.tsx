@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { DashboardCard } from '@/components/dashboard/DashboardCard';
@@ -215,7 +214,7 @@ export default function SBOM() {
                                     </Badge>
                                   </TableCell>
                                   <TableCell className="max-w-md">{vuln.description}</TableCell>
-                                  <TableCell>{vuln.fixedIn || "N/A"}</TableCell>
+                                  <TableCell>N/A</TableCell>
                                 </TableRow>
                               ))
                             )}
@@ -249,7 +248,7 @@ export default function SBOM() {
                               <TableCell>
                                 <Badge variant="outline">{license}</Badge>
                               </TableCell>
-                              <TableCell>{count}</TableCell>
+                              <TableCell>{count as React.ReactNode}</TableCell>
                               <TableCell>
                                 <div className="flex flex-wrap gap-1">
                                   {sampleSBOMData.packages
