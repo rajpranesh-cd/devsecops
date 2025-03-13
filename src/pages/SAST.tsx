@@ -1,10 +1,34 @@
 
+import { useState } from 'react';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { DashboardCard } from '@/components/dashboard/DashboardCard';
 import { Button } from '@/components/ui/button';
-import { Code2, Download, RefreshCw } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Code2, Download, RefreshCw, ExternalLink, ArrowUpRight } from 'lucide-react';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { sastResults, sastSummary, SastVulnerability } from '@/data/sastData';
+import { SastSecurityStats } from '@/components/sast/SastSecurityStats';
+import { cn } from '@/lib/utils';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 export default function SAST() {
+  const [selectedVulnerability, setSelectedVulnerability] = useState<SastVulnerability | null>(null);
+
+  const getSeverityColor = (severity: string) => {
+    switch (severity) {
+      case 'Critical':
+        return 'text-severity-critical bg-severity-critical/10 border-severity-critical/20';
+      case 'High':
+        return 'text-severity-high bg-severity-high/10 border-severity-high/20';
+      case 'Medium':
+        return 'text-severity-medium bg-severity-medium/10 border-severity-medium/20';
+      case 'Low':
+        return 'text-severity-low bg-severity-low/10 border-severity-low/20';
+      default:
+        return 'text-muted-foreground bg-muted/50 border-muted/20';
+    }
+  };
+
   return (
     <div className="flex h-screen w-full bg-background">
       <Sidebar />
@@ -19,24 +43,146 @@ export default function SAST() {
           <div className="flex items-center space-x-3">
             <Button variant="outline" size="sm">
               <Download className="h-4 w-4 mr-2" />
-              Export
+              Export Report
             </Button>
             <Button size="sm">
               <RefreshCw className="h-4 w-4 mr-2" />
-              Scan Now
+              Start New Scan
             </Button>
           </div>
         </header>
         
         <main className="flex-1 overflow-auto p-6">
+          <SastSecurityStats 
+            totalIssues={sastSummary.totalIssues}
+            severityCounts={sastSummary.severityCounts}
+          />
+          
           <DashboardCard title="SAST Scan Results">
-            <div className="py-12 text-center">
-              <h3 className="text-lg font-medium mb-2">Static Analysis Features</h3>
-              <p className="text-muted-foreground">
-                Configure your SAST settings to begin scanning for code vulnerabilities.
-              </p>
-              <Button className="mt-4">Configure SAST</Button>
-            </div>
+            {selectedVulnerability ? (
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <Button
+                    variant="ghost"
+                    onClick={() => setSelectedVulnerability(null)}
+                    className="-ml-2"
+                  >
+                    ← Back to Results
+                  </Button>
+                  <Badge className={cn('border', getSeverityColor(selectedVulnerability.severity))}>
+                    {selectedVulnerability.severity}
+                  </Badge>
+                </div>
+                
+                <div className="space-y-4">
+                  <div>
+                    <h3 className="text-lg font-medium">{selectedVulnerability.id}</h3>
+                    <p className="text-muted-foreground mt-1">
+                      {selectedVulnerability.description}
+                    </p>
+                  </div>
+                  
+                  <div className="p-4 bg-muted rounded-lg space-y-2">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground">File Location:</span>
+                      <span className="font-mono">{selectedVulnerability.location.file}:{selectedVulnerability.location.line}</span>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <h4 className="font-medium">Vulnerable Code</h4>
+                    <pre className="bg-muted p-4 rounded-lg overflow-auto">
+                      <code className="text-sm">{selectedVulnerability.codeSnippet}</code>
+                    </pre>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <h4 className="font-medium">References</h4>
+                    <div className="flex space-x-4">
+                      <a 
+                        href={`https://cwe.mitre.org/data/definitions/${selectedVulnerability.cwe.split('-')[1]}.html`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center text-blue-500 hover:text-blue-700"
+                      >
+                        {selectedVulnerability.cwe}
+                        <ArrowUpRight className="h-4 w-4 ml-1" />
+                      </a>
+                      <a 
+                        href={selectedVulnerability.owasp}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center text-blue-500 hover:text-blue-700"
+                      >
+                        OWASP Reference
+                        <ArrowUpRight className="h-4 w-4 ml-1" />
+                      </a>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <h4 className="font-medium">Remediation</h4>
+                    <p className="text-muted-foreground">
+                      {selectedVulnerability.remediation}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>ID</TableHead>
+                    <TableHead>Severity</TableHead>
+                    <TableHead>Description</TableHead>
+                    <TableHead>Location</TableHead>
+                    <TableHead>References</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {sastResults.map((vuln) => (
+                    <TableRow 
+                      key={vuln.id}
+                      className="cursor-pointer hover:bg-muted/50"
+                      onClick={() => setSelectedVulnerability(vuln)}
+                    >
+                      <TableCell className="font-medium">{vuln.id}</TableCell>
+                      <TableCell>
+                        <Badge className={cn('border', getSeverityColor(vuln.severity))}>
+                          {vuln.severity}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>{vuln.description}</TableCell>
+                      <TableCell className="font-mono text-sm">
+                        {vuln.location.file}:{vuln.location.line}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex space-x-2">
+                          <a 
+                            href={`https://cwe.mitre.org/data/definitions/${vuln.cwe.split('-')[1]}.html`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-500 hover:text-blue-700"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <ExternalLink className="h-4 w-4" />
+                          </a>
+                          <a 
+                            href={vuln.owasp}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-500 hover:text-blue-700"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <ArrowUpRight className="h-4 w-4" />
+                          </a>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
           </DashboardCard>
         </main>
       </div>
