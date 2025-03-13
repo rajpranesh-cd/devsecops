@@ -4,7 +4,7 @@ import { Sidebar } from '@/components/layout/Sidebar';
 import { DashboardCard } from '@/components/dashboard/DashboardCard';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Code2, Download, RefreshCw, ExternalLink, ArrowUpRight } from 'lucide-react';
+import { Code2, Download, RefreshCw, ExternalLink, ArrowUpRight, Building2, AlertTriangle } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { sastResults, sastSummary, SastVulnerability } from '@/data/sastData';
 import { SastSecurityStats } from '@/components/sast/SastSecurityStats';
@@ -13,6 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 export default function SAST() {
   const [selectedVulnerability, setSelectedVulnerability] = useState<SastVulnerability | null>(null);
+  const [activeTab, setActiveTab] = useState('all');
 
   const getSeverityColor = (severity: string) => {
     switch (severity) {
@@ -28,6 +29,14 @@ export default function SAST() {
         return 'text-muted-foreground bg-muted/50 border-muted/20';
     }
   };
+
+  // Get unique repositories
+  const repositories = Array.from(new Set(sastResults.map(vuln => vuln.repository)));
+
+  // Filter vulnerabilities based on active tab
+  const filteredVulnerabilities = activeTab === 'all' 
+    ? sastResults 
+    : sastResults.filter(vuln => vuln.repository === activeTab);
 
   return (
     <div className="flex h-screen w-full bg-background">
@@ -69,14 +78,24 @@ export default function SAST() {
                   >
                     ← Back to Results
                   </Button>
-                  <Badge className={cn('border', getSeverityColor(selectedVulnerability.severity))}>
-                    {selectedVulnerability.severity}
-                  </Badge>
+                  <div className="flex items-center gap-3">
+                    <Badge variant="outline" className="flex items-center gap-1">
+                      <Building2 className="h-3.5 w-3.5 mr-1" />
+                      {selectedVulnerability.repository}
+                    </Badge>
+                    <Badge className={cn('border', getSeverityColor(selectedVulnerability.severity))}>
+                      {selectedVulnerability.severity}
+                    </Badge>
+                  </div>
                 </div>
                 
                 <div className="space-y-4">
                   <div>
-                    <h3 className="text-lg font-medium">{selectedVulnerability.id}</h3>
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-lg font-medium">{selectedVulnerability.id}</h3>
+                      <span className="text-muted-foreground">-</span>
+                      <h3 className="text-lg">{selectedVulnerability.issueTitle}</h3>
+                    </div>
                     <p className="text-muted-foreground mt-1">
                       {selectedVulnerability.description}
                     </p>
@@ -129,59 +148,90 @@ export default function SAST() {
                 </div>
               </div>
             ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>ID</TableHead>
-                    <TableHead>Severity</TableHead>
-                    <TableHead>Description</TableHead>
-                    <TableHead>Location</TableHead>
-                    <TableHead>References</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {sastResults.map((vuln) => (
-                    <TableRow 
-                      key={vuln.id}
-                      className="cursor-pointer hover:bg-muted/50"
-                      onClick={() => setSelectedVulnerability(vuln)}
-                    >
-                      <TableCell className="font-medium">{vuln.id}</TableCell>
-                      <TableCell>
-                        <Badge className={cn('border', getSeverityColor(vuln.severity))}>
-                          {vuln.severity}
+              <>
+                <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
+                  <TabsList>
+                    <TabsTrigger value="all" className="flex items-center gap-1">
+                      <Code2 className="h-4 w-4" />
+                      All Issues
+                    </TabsTrigger>
+                    {repositories.map(repo => (
+                      <TabsTrigger 
+                        key={repo} 
+                        value={repo} 
+                        className="flex items-center gap-1"
+                      >
+                        <Building2 className="h-4 w-4" />
+                        {repo}
+                        <Badge variant="outline" className="ml-1 rounded-full py-0 px-1.5 text-xs">
+                          {sastResults.filter(v => v.repository === repo).length}
                         </Badge>
-                      </TableCell>
-                      <TableCell>{vuln.description}</TableCell>
-                      <TableCell className="font-mono text-sm">
-                        {vuln.location.file}:{vuln.location.line}
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex space-x-2">
-                          <a 
-                            href={`https://cwe.mitre.org/data/definitions/${vuln.cwe.split('-')[1]}.html`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-500 hover:text-blue-700"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            <ExternalLink className="h-4 w-4" />
-                          </a>
-                          <a 
-                            href={vuln.owasp}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-500 hover:text-blue-700"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            <ArrowUpRight className="h-4 w-4" />
-                          </a>
-                        </div>
-                      </TableCell>
+                      </TabsTrigger>
+                    ))}
+                  </TabsList>
+                </Tabs>
+
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>ID</TableHead>
+                      <TableHead>Repository</TableHead>
+                      <TableHead>Issue</TableHead>
+                      <TableHead>Severity</TableHead>
+                      <TableHead>Location</TableHead>
+                      <TableHead>References</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredVulnerabilities.map((vuln) => (
+                      <TableRow 
+                        key={vuln.id}
+                        className="cursor-pointer hover:bg-muted/50"
+                        onClick={() => setSelectedVulnerability(vuln)}
+                      >
+                        <TableCell className="font-medium">{vuln.id}</TableCell>
+                        <TableCell>
+                          <Badge variant="outline" className="flex items-center gap-1">
+                            <Building2 className="h-3.5 w-3.5" />
+                            {vuln.repository}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="max-w-md">{vuln.issueTitle}</TableCell>
+                        <TableCell>
+                          <Badge className={cn('border', getSeverityColor(vuln.severity))}>
+                            {vuln.severity}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="font-mono text-sm">
+                          {vuln.location.file}:{vuln.location.line}
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex space-x-2">
+                            <a 
+                              href={`https://cwe.mitre.org/data/definitions/${vuln.cwe.split('-')[1]}.html`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-blue-500 hover:text-blue-700"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <ExternalLink className="h-4 w-4" />
+                            </a>
+                            <a 
+                              href={vuln.owasp}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-blue-500 hover:text-blue-700"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <ArrowUpRight className="h-4 w-4" />
+                            </a>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </>
             )}
           </DashboardCard>
         </main>

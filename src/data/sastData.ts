@@ -1,6 +1,8 @@
 
 export type SastVulnerability = {
   id: string;
+  repository: string;
+  issueTitle: string;
   severity: 'Critical' | 'High' | 'Medium' | 'Low';
   description: string;
   location: {
@@ -16,6 +18,8 @@ export type SastVulnerability = {
 export const sastResults: SastVulnerability[] = [
   {
     id: "VULN-2025-001",
+    repository: "payment-service",
+    issueTitle: "SQL Injection in User Query",
     severity: "High",
     description: "SQL Injection vulnerability detected in database query",
     location: {
@@ -29,6 +33,8 @@ export const sastResults: SastVulnerability[] = [
   },
   {
     id: "VULN-2025-002",
+    repository: "auth-service",
+    issueTitle: "Hardcoded Credentials in Config",
     severity: "Critical",
     description: "Hardcoded credentials found in configuration file",
     location: {
@@ -42,6 +48,8 @@ export const sastResults: SastVulnerability[] = [
   },
   {
     id: "VULN-2025-003",
+    repository: "auth-service",
+    issueTitle: "Weak Random Number Generation",
     severity: "Medium",
     description: "Insecure random number generation",
     location: {
@@ -62,5 +70,9 @@ export const sastSummary = {
     High: sastResults.filter(v => v.severity === 'High').length,
     Medium: sastResults.filter(v => v.severity === 'Medium').length,
     Low: sastResults.filter(v => v.severity === 'Low').length
-  }
+  },
+  repositoryCounts: sastResults.reduce((acc, v) => {
+    acc[v.repository] = (acc[v.repository] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>)
 };
