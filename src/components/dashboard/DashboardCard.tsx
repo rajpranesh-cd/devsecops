@@ -1,9 +1,10 @@
 
+import { ReactNode } from 'react';
 import { cn } from '@/lib/utils';
 
 interface DashboardCardProps {
-  title: string;
-  children: React.ReactNode;
+  title: ReactNode;
+  children: ReactNode;
   className?: string;
   style?: React.CSSProperties;
 }
@@ -11,18 +12,13 @@ interface DashboardCardProps {
 export function DashboardCard({ title, children, className, style }: DashboardCardProps) {
   return (
     <div 
-      className={cn(
-        "bg-card text-card-foreground rounded-xl border shadow-sm overflow-hidden transition-all duration-200 hover:shadow-md",
-        className
-      )}
+      className={cn("bg-card rounded-lg border shadow-sm overflow-hidden animate-in fade-in-50", className)}
       style={style}
     >
-      <div className="flex items-center justify-between px-6 py-4 bg-muted/30 border-b">
-        <h3 className="font-semibold">{title}</h3>
+      <div className="flex flex-col space-y-1.5 p-6 pb-0">
+        <h3 className="text-lg font-semibold leading-none tracking-tight">{title}</h3>
       </div>
-      <div className="p-6">
-        {children}
-      </div>
+      <div className="p-6 pt-4">{children}</div>
     </div>
   );
 }
