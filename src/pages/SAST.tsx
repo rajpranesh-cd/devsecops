@@ -9,11 +9,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { sastResults, sastSummary, SastVulnerability } from '@/data/sastData';
 import { SastSecurityStats } from '@/components/sast/SastSecurityStats';
 import { cn } from '@/lib/utils';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 export default function SAST() {
   const [selectedVulnerability, setSelectedVulnerability] = useState<SastVulnerability | null>(null);
-  const [activeTab, setActiveTab] = useState('all');
 
   const getSeverityColor = (severity: string) => {
     switch (severity) {
@@ -29,14 +27,6 @@ export default function SAST() {
         return 'text-muted-foreground bg-muted/50 border-muted/20';
     }
   };
-
-  // Get unique repositories
-  const repositories = Array.from(new Set(sastResults.map(vuln => vuln.repository)));
-
-  // Filter vulnerabilities based on active tab
-  const filteredVulnerabilities = activeTab === 'all' 
-    ? sastResults 
-    : sastResults.filter(vuln => vuln.repository === activeTab);
 
   return (
     <div className="flex h-screen w-full bg-background">
@@ -91,11 +81,7 @@ export default function SAST() {
                 
                 <div className="space-y-4">
                   <div>
-                    <div className="flex items-center gap-2">
-                      <h3 className="text-lg font-medium">{selectedVulnerability.id}</h3>
-                      <span className="text-muted-foreground">-</span>
-                      <h3 className="text-lg">{selectedVulnerability.issueTitle}</h3>
-                    </div>
+                    <h3 className="text-lg">{selectedVulnerability.issueTitle}</h3>
                     <p className="text-muted-foreground mt-1">
                       {selectedVulnerability.description}
                     </p>
@@ -149,32 +135,16 @@ export default function SAST() {
               </div>
             ) : (
               <>
-                <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
-                  <TabsList>
-                    <TabsTrigger value="all" className="flex items-center gap-1">
-                      <Code2 className="h-4 w-4" />
-                      All Issues
-                    </TabsTrigger>
-                    {repositories.map(repo => (
-                      <TabsTrigger 
-                        key={repo} 
-                        value={repo} 
-                        className="flex items-center gap-1"
-                      >
-                        <Building2 className="h-4 w-4" />
-                        {repo}
-                        <Badge variant="outline" className="ml-1 rounded-full py-0 px-1.5 text-xs">
-                          {sastResults.filter(v => v.repository === repo).length}
-                        </Badge>
-                      </TabsTrigger>
-                    ))}
-                  </TabsList>
-                </Tabs>
+                <div className="mb-4">
+                  <Button variant="outline" size="sm" className="flex items-center gap-1">
+                    <Code2 className="h-4 w-4" />
+                    All Issues
+                  </Button>
+                </div>
 
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>ID</TableHead>
                       <TableHead>Repository</TableHead>
                       <TableHead>Issue</TableHead>
                       <TableHead>Severity</TableHead>
@@ -183,13 +153,12 @@ export default function SAST() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredVulnerabilities.map((vuln) => (
+                    {sastResults.map((vuln) => (
                       <TableRow 
                         key={vuln.id}
                         className="cursor-pointer hover:bg-muted/50"
                         onClick={() => setSelectedVulnerability(vuln)}
                       >
-                        <TableCell className="font-medium">{vuln.id}</TableCell>
                         <TableCell>
                           <Badge variant="outline" className="flex items-center gap-1">
                             <Building2 className="h-3.5 w-3.5" />
