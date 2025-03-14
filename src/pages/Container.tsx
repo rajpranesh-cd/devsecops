@@ -89,9 +89,9 @@ export default function Container() {
   // Filter containerScanResults based on search query
   const filteredContainerScanResults = containerScanResults.filter(image => {
     return searchQuery === '' || 
-      image.repository.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      image.tag.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      image.digest.toLowerCase().includes(searchQuery.toLowerCase());
+      image.image_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      image.metadata.os.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      image.image_digest.toLowerCase().includes(searchQuery.toLowerCase());
   });
 
   return (
