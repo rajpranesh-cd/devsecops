@@ -4,11 +4,73 @@ import { DashboardCard } from '@/components/dashboard/DashboardCard';
 import { SeverityPieChart } from '@/components/dashboard/SeverityPieChart';
 import { ContainerScanStats } from '@/components/dashboard/ContainerScanStats';
 import { ContainerImageList } from '@/components/dashboard/ContainerImageList';
+import { ContainerTable } from '@/components/dashboard/ContainerTable';
 import { Button } from '@/components/ui/button';
-import { Box, Download, RefreshCw } from 'lucide-react';
+import { Box, RefreshCw } from 'lucide-react';
 import { containerScanResults, containerScanSummary } from '@/data/containerScanData';
 
 export default function Container() {
+  // Sample container repository data with issues
+  const containerRepoData = [
+    {
+      repository: "payment-service",
+      issues: [
+        {
+          id: "CVE-2023-1234",
+          title: "OS Command Injection in Base Image",
+          severity: "Critical",
+          location: "/usr/lib/package/vulnerable-component.so",
+          references: "https://nvd.nist.gov/vuln/detail/CVE-2023-1234"
+        },
+        {
+          id: "CVE-2023-5678",
+          title: "Privilege Escalation Vulnerability",
+          severity: "High",
+          location: "/etc/security/access.conf",
+          references: "https://nvd.nist.gov/vuln/detail/CVE-2023-5678"
+        }
+      ]
+    },
+    {
+      repository: "auth-service",
+      issues: [
+        {
+          id: "CVE-2023-9012",
+          title: "Insecure Default Configuration",
+          severity: "Medium",
+          location: "/app/config/security.yaml",
+          references: "https://nvd.nist.gov/vuln/detail/CVE-2023-9012"
+        }
+      ]
+    },
+    {
+      repository: "user-service",
+      issues: [
+        {
+          id: "CVE-2023-7890",
+          title: "Exposed Sensitive Environment Variables",
+          severity: "High",
+          location: "Dockerfile:15",
+          references: "https://nvd.nist.gov/vuln/detail/CVE-2023-7890"
+        },
+        {
+          id: "CVE-2023-3456",
+          title: "Out-of-date Base Image",
+          severity: "Medium",
+          location: "Dockerfile:1",
+          references: "https://nvd.nist.gov/vuln/detail/CVE-2023-3456"
+        },
+        {
+          id: "CVE-2023-2345",
+          title: "Root Execution Vulnerability",
+          severity: "Low",
+          location: "Dockerfile:8",
+          references: "https://nvd.nist.gov/vuln/detail/CVE-2023-2345"
+        }
+      ]
+    }
+  ];
+
   return (
     <div className="flex h-screen w-full bg-background">
       <Sidebar />
@@ -21,10 +83,6 @@ export default function Container() {
           </div>
           
           <div className="flex items-center space-x-3">
-            <Button variant="outline" size="sm">
-              <Download className="h-4 w-4 mr-2" />
-              Export
-            </Button>
             <Button size="sm">
               <RefreshCw className="h-4 w-4 mr-2" />
               Scan Now
@@ -105,6 +163,8 @@ export default function Container() {
               </div>
             </DashboardCard>
           </div>
+          
+          <ContainerTable data={containerRepoData} />
           
           <ContainerImageList containerImages={containerScanResults} />
         </main>
