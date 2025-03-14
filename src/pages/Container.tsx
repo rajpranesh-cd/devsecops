@@ -1,11 +1,9 @@
-
 import { useState } from 'react';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { DashboardCard } from '@/components/dashboard/DashboardCard';
 import { SeverityPieChart } from '@/components/dashboard/SeverityPieChart';
 import { ContainerScanStats } from '@/components/dashboard/ContainerScanStats';
 import { ContainerImageList } from '@/components/dashboard/ContainerImageList';
-import { ContainerTable } from '@/components/dashboard/ContainerTable';
 import { Button } from '@/components/ui/button';
 import { Box, RefreshCw, Filter } from 'lucide-react';
 import { containerScanResults, containerScanSummary } from '@/data/containerScanData';
@@ -201,8 +199,6 @@ export default function Container() {
               </div>
             </DashboardCard>
           </div>
-          
-          <ContainerTable data={filteredContainerRepoData} />
           
           <ContainerImageList containerImages={filteredContainerScanResults} />
         </main>
