@@ -9,11 +9,12 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { sastResults, sastSummary, SastVulnerability } from '@/data/sastData';
 import { SastSecurityStats } from '@/components/sast/SastSecurityStats';
 import { cn } from '@/lib/utils';
-import { iacSecurityResults } from '@/data/iacSecurityData';
+import { iacSecurityResults, IacSecurityResult } from '@/data/iacSecurityData';
 
 export default function SAST() {
   const [selectedVulnerability, setSelectedVulnerability] = useState<SastVulnerability | null>(null);
   const [showIacResults, setShowIacResults] = useState(false);
+  const [selectedIacVulnerability, setSelectedIacVulnerability] = useState<IacSecurityResult | null>(null);
 
   const getSeverityColor = (severity: string) => {
     switch (severity) {
@@ -63,7 +64,11 @@ export default function SAST() {
             <Button 
               variant={!showIacResults ? "default" : "outline"} 
               size="sm"
-              onClick={() => setShowIacResults(false)}
+              onClick={() => {
+                setShowIacResults(false);
+                setSelectedIacVulnerability(null);
+                setSelectedVulnerability(null);
+              }}
               className="flex items-center gap-1"
             >
               <Code2 className="h-4 w-4 mr-1" />
@@ -72,7 +77,11 @@ export default function SAST() {
             <Button 
               variant={showIacResults ? "default" : "outline"} 
               size="sm"
-              onClick={() => setShowIacResults(true)}
+              onClick={() => {
+                setShowIacResults(true);
+                setSelectedVulnerability(null);
+                setSelectedIacVulnerability(null);
+              }}
               className="flex items-center gap-1"
             >
               <Terminal className="h-4 w-4 mr-1" />
@@ -82,51 +91,127 @@ export default function SAST() {
           
           {showIacResults ? (
             <DashboardCard title="Infrastructure as Code Security Analysis">
-              <div className="space-y-6">
-                {iacSecurityResults.map((result, index) => (
-                  <div key={index} className="border rounded-lg p-4 bg-card">
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center">
-                        <Badge className={cn('border mr-2', getSeverityColor(result.severity))}>
-                          {result.severity}
-                        </Badge>
-                        <h3 className="font-medium">{result.checkId}: {result.title}</h3>
-                      </div>
+              {selectedIacVulnerability ? (
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between">
+                    <Button
+                      variant="ghost"
+                      onClick={() => setSelectedIacVulnerability(null)}
+                      className="-ml-2"
+                    >
+                      ← Back to Results
+                    </Button>
+                    <div className="flex items-center gap-3">
                       <Badge variant="outline" className="flex items-center gap-1">
                         <Building2 className="h-3.5 w-3.5 mr-1" />
-                        {result.resource}
+                        {selectedIacVulnerability.repository}
+                      </Badge>
+                      <Badge className={cn('border', getSeverityColor(selectedIacVulnerability.severity))}>
+                        {selectedIacVulnerability.severity}
                       </Badge>
                     </div>
+                  </div>
+                  
+                  <div className="space-y-4">
+                    <div>
+                      <h3 className="text-lg">{selectedIacVulnerability.checkId}: {selectedIacVulnerability.title}</h3>
+                      <p className="text-muted-foreground mt-1">
+                        {selectedIacVulnerability.description}
+                      </p>
+                    </div>
                     
-                    <div className="mb-3 text-sm text-muted-foreground">
-                      <div className="flex items-center text-xs mb-1">
-                        <span className="text-muted-foreground mr-2">File Location:</span>
-                        <span className="font-mono">{result.file}</span>
+                    <div className="p-4 bg-muted rounded-lg space-y-2">
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-muted-foreground">Resource:</span>
+                        <span className="font-mono">{selectedIacVulnerability.resource}</span>
+                      </div>
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-muted-foreground">File Location:</span>
+                        <span className="font-mono">{selectedIacVulnerability.file}</span>
                       </div>
                     </div>
                     
                     <div className="space-y-2">
-                      <h4 className="text-sm font-medium">Code Snippet</h4>
-                      <pre className="bg-muted p-4 rounded-lg overflow-auto max-h-60 text-xs">
-                        <code>{result.codeSnippet}</code>
+                      <h4 className="font-medium">Vulnerable Configuration</h4>
+                      <pre className="bg-muted p-4 rounded-lg overflow-auto">
+                        <code className="text-sm">{selectedIacVulnerability.codeSnippet}</code>
                       </pre>
                     </div>
                     
-                    <div className="mt-3 flex justify-between items-center">
-                      <p className="text-sm text-muted-foreground">{result.description}</p>
+                    <div className="space-y-2">
+                      <h4 className="font-medium">Remediation</h4>
+                      <p className="text-muted-foreground">
+                        {selectedIacVulnerability.remediation.summary}
+                      </p>
                       <a 
-                        href={result.remediation.guide}
+                        href={selectedIacVulnerability.remediation.guide}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center text-blue-500 hover:text-blue-700 text-sm"
+                        className="inline-flex items-center text-blue-500 hover:text-blue-700"
                       >
                         View Remediation Guide
                         <ArrowUpRight className="h-4 w-4 ml-1" />
                       </a>
                     </div>
                   </div>
-                ))}
-              </div>
+                </div>
+              ) : (
+                <div className="space-y-6">
+                  {iacSecurityResults.map((result, index) => (
+                    <div 
+                      key={index} 
+                      className="border rounded-lg p-4 bg-card cursor-pointer hover:bg-muted/50 transition-colors"
+                      onClick={() => setSelectedIacVulnerability(result)}
+                    >
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center">
+                          <Badge className={cn('border mr-2', getSeverityColor(result.severity))}>
+                            {result.severity}
+                          </Badge>
+                          <h3 className="font-medium">{result.checkId}: {result.title}</h3>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Badge variant="outline" className="flex items-center gap-1">
+                            <Building2 className="h-3.5 w-3.5 mr-1" />
+                            {result.repository}
+                          </Badge>
+                          <Badge variant="outline" className="flex items-center gap-1">
+                            {result.resource}
+                          </Badge>
+                        </div>
+                      </div>
+                      
+                      <div className="mb-3 text-sm text-muted-foreground">
+                        <div className="flex items-center text-xs mb-1">
+                          <span className="text-muted-foreground mr-2">File Location:</span>
+                          <span className="font-mono">{result.file}</span>
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <h4 className="text-sm font-medium">Code Snippet</h4>
+                        <pre className="bg-muted p-4 rounded-lg overflow-auto max-h-60 text-xs">
+                          <code>{result.codeSnippet}</code>
+                        </pre>
+                      </div>
+                      
+                      <div className="mt-3 flex justify-between items-center">
+                        <p className="text-sm text-muted-foreground">{result.description}</p>
+                        <a 
+                          href={result.remediation.guide}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center text-blue-500 hover:text-blue-700 text-sm"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          View Remediation Guide
+                          <ArrowUpRight className="h-4 w-4 ml-1" />
+                        </a>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </DashboardCard>
           ) : (
             <DashboardCard title="SAST Scan Results">

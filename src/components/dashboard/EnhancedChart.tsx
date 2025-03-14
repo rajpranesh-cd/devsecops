@@ -1,7 +1,7 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { summaryStats } from "@/data/sampleData";
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, TooltipProps } from 'recharts';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, TooltipProps } from 'recharts';
 import { Badge } from '@/components/ui/badge';
 import { cn } from "@/lib/utils";
 
@@ -157,7 +157,15 @@ export function EnhancedChart({ className, style }: EnhancedChartProps) {
             </AreaChart>
           </ResponsiveContainer>
         </div>
-        <div className="flex justify-center mt-4 gap-4">
+        <div className="flex justify-center mt-4 space-x-6">
+          <div className="flex items-center">
+            <span className="w-3 h-3 rounded-full bg-severity-critical mr-2"></span>
+            <span className="text-xs">Critical</span>
+          </div>
+          <div className="flex items-center">
+            <span className="w-3 h-3 rounded-full bg-severity-high mr-2"></span>
+            <span className="text-xs">High</span>
+          </div>
           <div className="flex items-center">
             <span className="w-3 h-3 rounded-full bg-severity-medium mr-2"></span>
             <span className="text-xs">Medium</span>

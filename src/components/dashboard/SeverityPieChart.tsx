@@ -77,9 +77,15 @@ export function SeverityPieChart({ data, className, style }: SeverityPieChartPro
               layout="horizontal" 
               verticalAlign="bottom" 
               align="center"
-              formatter={(value) => (
-                <span className="text-xs font-medium px-2">{value}</span>
-              )}
+              formatter={(value, entry) => {
+                const { payload } = entry as any;
+                const percentage = ((payload.value / totalIssues) * 100).toFixed(1);
+                return (
+                  <span className="text-xs font-medium px-2">
+                    {value} ({percentage}%)
+                  </span>
+                );
+              }}
               iconSize={12}
               iconType="circle"
               wrapperStyle={{

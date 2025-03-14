@@ -3,6 +3,7 @@ export type IacSecurityResult = {
   checkId: string;
   title: string;
   severity: 'Critical' | 'High' | 'Medium' | 'Low';
+  repository: string;
   resource: string;
   file: string;
   description: string;
@@ -18,6 +19,7 @@ export const iacSecurityResults: IacSecurityResult[] = [
     checkId: "CKV_ALI_6",
     title: "Ensure OSS bucket is encrypted with Customer Master Key",
     severity: "High",
+    repository: "terraform-repo",
     resource: "alicloud_oss_bucket.bad_bucket",
     file: "/terraform/alicloud/bucket.tf:1-18",
     description: "This bucket lacks encryption with a Customer Master Key, making it vulnerable to unauthorized data access.",
@@ -48,6 +50,7 @@ export const iacSecurityResults: IacSecurityResult[] = [
     checkId: "CKV_AWS_18",
     title: "Ensure S3 bucket has access logging enabled",
     severity: "Medium",
+    repository: "aws-infra",
     resource: "aws_s3_bucket.data",
     file: "/terraform/aws/s3.tf:5-20",
     description: "Access logging is not enabled for this S3 bucket, which limits your ability to track access and identify potential security incidents.",
@@ -78,6 +81,7 @@ export const iacSecurityResults: IacSecurityResult[] = [
     checkId: "CKV_AZURE_2",
     title: "Ensure storage account secure transfer is enabled",
     severity: "Critical",
+    repository: "azure-platform",
     resource: "azurerm_storage_account.example",
     file: "/terraform/azure/storage.tf:1-10",
     description: "Storage account is not configured to require secure transfer (HTTPS), allowing data to be transmitted in plaintext.",

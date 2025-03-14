@@ -10,7 +10,6 @@ import { summaryStats } from '@/data/sampleData';
 export default function Dashboard() {
   const timelineData = summaryStats.scanTimeline;
   const totalFindings = summaryStats.totalFindings;
-  const highPercentage = Math.round((totalFindings.high / (totalFindings.critical + totalFindings.high + totalFindings.medium + totalFindings.low)) * 100);
 
   return (
     <div className="flex h-screen w-full bg-background">
@@ -42,7 +41,7 @@ export default function Dashboard() {
             />
             <StatCard
               title="High Issues"
-              value={`${summaryStats.totalFindings.high} (${highPercentage}%)`}
+              value={summaryStats.totalFindings.high}
               variant="high"
               icon={<AlertTriangle className="h-5 w-5" />}
               description="Across all repositories"
