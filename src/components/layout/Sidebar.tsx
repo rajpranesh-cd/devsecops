@@ -12,7 +12,8 @@ import {
   GitFork, 
   Settings, 
   ChevronLeft, 
-  ChevronRight 
+  ChevronRight,
+  Shield 
 } from 'lucide-react';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
 
@@ -60,6 +61,11 @@ const navItems: NavItem[] = [
     title: 'Supply Chain',
     path: '/supply-chain',
     icon: GitFork,
+  },
+  {
+    title: 'Integration',
+    path: '/integration',
+    icon: Shield,
   },
 ];
 
