@@ -1,4 +1,5 @@
 
+import { useState } from 'react';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { DashboardCard } from '@/components/dashboard/DashboardCard';
 import { SeverityPieChart } from '@/components/dashboard/SeverityPieChart';
@@ -6,10 +7,13 @@ import { ContainerScanStats } from '@/components/dashboard/ContainerScanStats';
 import { ContainerImageList } from '@/components/dashboard/ContainerImageList';
 import { ContainerTable } from '@/components/dashboard/ContainerTable';
 import { Button } from '@/components/ui/button';
-import { Box, RefreshCw } from 'lucide-react';
+import { Box, RefreshCw, Filter } from 'lucide-react';
 import { containerScanResults, containerScanSummary } from '@/data/containerScanData';
+import { Input } from '@/components/ui/input';
 
 export default function Container() {
+  const [searchQuery, setSearchQuery] = useState('');
+  
   // Sample container repository data with issues - with typed severity
   const containerRepoData = [
     {
@@ -71,6 +75,25 @@ export default function Container() {
     }
   ];
 
+  // Filter containerRepoData based on search query
+  const filteredContainerRepoData = containerRepoData.filter(repo => {
+    return searchQuery === '' || 
+      repo.repository.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      repo.issues.some(issue => 
+        issue.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        issue.severity.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        issue.id.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+  });
+
+  // Filter containerScanResults based on search query
+  const filteredContainerScanResults = containerScanResults.filter(image => {
+    return searchQuery === '' || 
+      image.repository.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      image.tag.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      image.digest.toLowerCase().includes(searchQuery.toLowerCase());
+  });
+
   return (
     <div className="flex h-screen w-full bg-background">
       <Sidebar />
@@ -89,6 +112,21 @@ export default function Container() {
             </Button>
           </div>
         </header>
+        
+        <div className="px-6 py-4 border-b">
+          <div className="relative max-w-md">
+            <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+              <Filter className="h-4 w-4 text-muted-foreground" />
+            </div>
+            <Input
+              type="text"
+              placeholder="Filter by repository, image, severity..."
+              className="pl-10"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+        </div>
         
         <main className="flex-1 overflow-auto p-6 space-y-6">
           <ContainerScanStats 
@@ -164,9 +202,9 @@ export default function Container() {
             </DashboardCard>
           </div>
           
-          <ContainerTable data={containerRepoData} />
+          <ContainerTable data={filteredContainerRepoData} />
           
-          <ContainerImageList containerImages={containerScanResults} />
+          <ContainerImageList containerImages={filteredContainerScanResults} />
         </main>
       </div>
     </div>

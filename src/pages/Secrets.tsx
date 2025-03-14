@@ -5,8 +5,14 @@ import { DashboardCard } from '@/components/dashboard/DashboardCard';
 import { sampleSecretScanResults } from '@/data/sampleData';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Search, Download, Eye, EyeOff, RefreshCw, FileKey } from 'lucide-react';
+import { Search, Download, Eye, EyeOff, RefreshCw, FileKey, Filter } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 export default function Secrets() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -30,6 +36,13 @@ export default function Secrets() {
     setTimeout(() => {
       setIsScanning(false);
     }, 3000);
+  };
+
+  const handleExport = (format: 'pdf' | 'json' | 'csv') => {
+    // In a real implementation, this would generate and download the file
+    // For this demo, we'll just show what would happen
+    console.log(`Exporting ${filteredFindings.length} secrets in ${format.toUpperCase()} format`);
+    alert(`Exporting ${filteredFindings.length} secrets in ${format.toUpperCase()} format`);
   };
 
   return (
@@ -57,10 +70,25 @@ export default function Secrets() {
                 </>
               )}
             </Button>
-            <Button variant="outline" size="sm">
-              <Download className="h-4 w-4 mr-2" />
-              Export
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <Download className="h-4 w-4 mr-2" />
+                  Export
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => handleExport('pdf')}>
+                  Export as PDF
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleExport('json')}>
+                  Export as JSON
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleExport('csv')}>
+                  Export as CSV
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
             <Button size="sm" onClick={handleStartScan} disabled={isScanning}>
               {isScanning ? (
                 <>
@@ -79,9 +107,9 @@ export default function Secrets() {
         
         <div className="px-6 py-4 border-b">
           <div className="relative max-w-md">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search repositories, files, secret types..."
+              placeholder="Filter repositories, files, secret types..."
               className="pl-10"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -90,7 +118,30 @@ export default function Secrets() {
         </div>
         
         <main className="flex-1 overflow-auto p-6">
-          <DashboardCard title={`Secret Scanning Results (${filteredFindings.length})`}>
+          <DashboardCard 
+            title={`Secret Scanning Results (${filteredFindings.length})`}
+            action={
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm">
+                    <Download className="h-4 w-4 mr-2" />
+                    Export
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => handleExport('pdf')}>
+                    Export as PDF
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleExport('json')}>
+                    Export as JSON
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleExport('csv')}>
+                    Export as CSV
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            }
+          >
             <div className="overflow-auto">
               <table className="w-full text-sm">
                 <thead>
@@ -133,7 +184,7 @@ export default function Secrets() {
                   {filteredFindings.length === 0 && (
                     <tr>
                       <td colSpan={7} className="py-8 text-center text-muted-foreground">
-                        No secrets found matching your search criteria.
+                        No secrets found matching your filter criteria.
                       </td>
                     </tr>
                   )}
