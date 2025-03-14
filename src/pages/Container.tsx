@@ -10,7 +10,7 @@ import { Box, RefreshCw } from 'lucide-react';
 import { containerScanResults, containerScanSummary } from '@/data/containerScanData';
 
 export default function Container() {
-  // Sample container repository data with issues
+  // Sample container repository data with issues - with typed severity
   const containerRepoData = [
     {
       repository: "payment-service",
@@ -18,14 +18,14 @@ export default function Container() {
         {
           id: "CVE-2023-1234",
           title: "OS Command Injection in Base Image",
-          severity: "Critical",
+          severity: "Critical" as const,
           location: "/usr/lib/package/vulnerable-component.so",
           references: "https://nvd.nist.gov/vuln/detail/CVE-2023-1234"
         },
         {
           id: "CVE-2023-5678",
           title: "Privilege Escalation Vulnerability",
-          severity: "High",
+          severity: "High" as const,
           location: "/etc/security/access.conf",
           references: "https://nvd.nist.gov/vuln/detail/CVE-2023-5678"
         }
@@ -37,7 +37,7 @@ export default function Container() {
         {
           id: "CVE-2023-9012",
           title: "Insecure Default Configuration",
-          severity: "Medium",
+          severity: "Medium" as const,
           location: "/app/config/security.yaml",
           references: "https://nvd.nist.gov/vuln/detail/CVE-2023-9012"
         }
@@ -49,21 +49,21 @@ export default function Container() {
         {
           id: "CVE-2023-7890",
           title: "Exposed Sensitive Environment Variables",
-          severity: "High",
+          severity: "High" as const,
           location: "Dockerfile:15",
           references: "https://nvd.nist.gov/vuln/detail/CVE-2023-7890"
         },
         {
           id: "CVE-2023-3456",
           title: "Out-of-date Base Image",
-          severity: "Medium",
+          severity: "Medium" as const,
           location: "Dockerfile:1",
           references: "https://nvd.nist.gov/vuln/detail/CVE-2023-3456"
         },
         {
           id: "CVE-2023-2345",
           title: "Root Execution Vulnerability",
-          severity: "Low",
+          severity: "Low" as const,
           location: "Dockerfile:8",
           references: "https://nvd.nist.gov/vuln/detail/CVE-2023-2345"
         }
