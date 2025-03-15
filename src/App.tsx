@@ -13,11 +13,14 @@ import SBOM from './pages/SBOM';
 import SupplyChain from './pages/SupplyChain';
 import Settings from './pages/Settings';
 import Integration from './pages/Integration';
+import { ThemeProvider } from './contexts/ThemeContext';
 
 function App() {
   return (
     <React.StrictMode>
-      <RouterProvider router={router} />
+      <ThemeProvider>
+        <RouterProvider router={router} />
+      </ThemeProvider>
     </React.StrictMode>
   );
 }
