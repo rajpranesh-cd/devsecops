@@ -1,3 +1,4 @@
+
 import React from 'react';
 import {
   createBrowserRouter,
@@ -5,10 +6,10 @@ import {
 } from "react-router-dom";
 import Dashboard from './pages/Dashboard';
 import Secrets from './pages/Secrets';
-import Sast from './pages/Sast';
-import Sca from './pages/Sca';
+import SAST from './pages/SAST';
+import SCA from './pages/SCA';
 import Container from './pages/Container';
-import Sbom from './pages/Sbom';
+import SBOM from './pages/SBOM';
 import SupplyChain from './pages/SupplyChain';
 import Settings from './pages/Settings';
 import Integration from './pages/Integration';
@@ -32,11 +33,11 @@ const router = createBrowserRouter([
   },
   {
     path: "/sast",
-    element: <Sast />,
+    element: <SAST />,
   },
   {
     path: "/sca",
-    element: <Sca />,
+    element: <SCA />,
   },
   {
     path: "/container",
@@ -44,7 +45,7 @@ const router = createBrowserRouter([
   },
   {
     path: "/sbom",
-    element: <Sbom />,
+    element: <SBOM />,
   },
   {
     path: "/supply-chain",
