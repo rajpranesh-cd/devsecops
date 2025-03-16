@@ -55,7 +55,35 @@ export default function Settings() {
     }, 1000);
   };
 
-  const handleTestConnection = () => {
+  const validateGitHubCredentials = async (token: string, org: string) => {
+    try {
+      // Make a call to GitHub API to validate the token and org
+      const response = await fetch(`https://api.github.com/orgs/${org}`, {
+        headers: {
+          'Authorization': `token ${token}`,
+          'Accept': 'application/vnd.github.v3+json'
+        }
+      });
+      
+      if (response.ok) {
+        return { valid: true, message: 'Connection to GitHub successful' };
+      } else {
+        const data = await response.json();
+        return { 
+          valid: false, 
+          message: `Connection failed: ${data.message || 'Invalid credentials'}` 
+        };
+      }
+    } catch (error) {
+      console.error('Error validating GitHub credentials:', error);
+      return { 
+        valid: false, 
+        message: 'Connection failed: Network error or invalid credentials' 
+      };
+    }
+  };
+
+  const handleTestConnection = async () => {
     if (!githubToken || !githubOrg) {
       toast.error('GitHub token and organization name are required');
       return;
@@ -63,16 +91,20 @@ export default function Settings() {
     
     setTestingConnection(true);
     
-    // Simulate API call to test GitHub connection
-    setTimeout(() => {
-      setTestingConnection(false);
+    try {
+      const result = await validateGitHubCredentials(githubToken, githubOrg);
       
-      if (githubToken && githubOrg) {
-        toast.success('Connection to GitHub successful');
+      if (result.valid) {
+        toast.success(result.message);
       } else {
-        toast.error('Connection failed. Please check your credentials');
+        toast.error(result.message);
       }
-    }, 1500);
+    } catch (error) {
+      console.error('Error testing connection:', error);
+      toast.error('Connection test failed due to an unexpected error');
+    } finally {
+      setTestingConnection(false);
+    }
   };
 
   const handleToggleSampleData = (checked: boolean) => {

@@ -20,6 +20,7 @@ export default function Secrets() {
   const [showSecrets, setShowSecrets] = useState(false);
   const [isScanning, setIsScanning] = useState(false);
   const [scanResults, setScanResults] = useState(sampleSecretScanResults);
+  const [useSampleData, setUseSampleData] = useState(true);
   
   // GitHub settings
   const [githubToken, setGithubToken] = useState('');
@@ -30,9 +31,13 @@ export default function Secrets() {
     // Retrieve settings from localStorage
     const savedToken = localStorage.getItem('githubToken');
     const savedOrg = localStorage.getItem('githubOrg');
+    const savedUseSampleData = localStorage.getItem('useSampleData');
     
     if (savedToken) setGithubToken(savedToken);
     if (savedOrg) setGithubOrg(savedOrg);
+    if (savedUseSampleData !== null) {
+      setUseSampleData(savedUseSampleData === 'true');
+    }
   }, []);
   
   // Combine all findings from all repositories
@@ -47,6 +52,12 @@ export default function Secrets() {
   );
   
   const runSecretScan = async () => {
+    // Don't perform actual scan if using sample data
+    if (useSampleData) {
+      simulateScanWithSampleData();
+      return;
+    }
+    
     // Check for required credentials
     if (!githubToken || !githubOrg) {
       toast.error('GitHub token and organization name are required. Please set them in the Settings page.');
@@ -57,42 +68,62 @@ export default function Secrets() {
     
     try {
       // In a real implementation, this would call an API or run the GitLeaks scan
-      // For this demo, we'll simulate the scanning process
-      toast.info(`Starting scan for organization: ${githubOrg}`);
-      
-      // Simulate the steps of the scanning process with toast notifications
-      setTimeout(() => {
-        toast.info('Discovering repositories...');
-      }, 1000);
-      
-      setTimeout(() => {
-        toast.info('Determining default branches...');
-      }, 2000);
-      
-      setTimeout(() => {
-        toast.info('Cloning/syncing repositories...');
-      }, 3000);
-      
-      setTimeout(() => {
-        toast.info('Running GitLeaks scans...');
-      }, 4000);
-      
-      setTimeout(() => {
-        toast.info('Aggregating results...');
-      }, 5000);
-      
-      // Simulate finding some secrets
-      setTimeout(() => {
-        toast.success('Scanning completed!');
-        // In a real implementation, we would update with real results from the scan
-        setScanResults(sampleSecretScanResults);
-        setIsScanning(false);
-      }, 6000);
+      await simulateRealScan(githubToken, githubOrg);
     } catch (error) {
       console.error('Error during secret scanning:', error);
       toast.error('An error occurred during scanning');
+    } finally {
       setIsScanning(false);
     }
+  };
+
+  const simulateScanWithSampleData = () => {
+    setIsScanning(true);
+    
+    // Show toast notifications to simulate the scanning process
+    toast.info('Using sample data for scan simulation');
+    
+    setTimeout(() => {
+      toast.success('Scan completed with sample data');
+      setScanResults(sampleSecretScanResults);
+      setIsScanning(false);
+    }, 2000);
+  };
+
+  const simulateRealScan = async (token: string, org: string) => {
+    // In a real implementation, this would perform an actual scan using the provided credentials
+    // For now, we'll simulate the steps of a real scanning process
+    
+    toast.info(`Starting scan for organization: ${org}`);
+    
+    // Simulate repository discovery
+    await simulateStep('Discovering repositories...', 1000);
+    
+    // Simulate branch determination
+    await simulateStep('Determining default branches...', 1000);
+    
+    // Simulate repository syncing
+    await simulateStep('Cloning/syncing repositories...', 1500);
+    
+    // Simulate GitLeaks scanning
+    await simulateStep('Running GitLeaks scans...', 2000);
+    
+    // Simulate result aggregation
+    await simulateStep('Aggregating results...', 1000);
+    
+    // Simulate completion
+    toast.success('Scanning completed!');
+    
+    // In a real implementation, we would update with real results from the scan
+    // For this simulation, we'll use the sample data
+    setScanResults(sampleSecretScanResults);
+  };
+
+  const simulateStep = (message: string, delay: number): Promise<void> => {
+    return new Promise(resolve => {
+      toast.info(message);
+      setTimeout(resolve, delay);
+    });
   };
 
   const handleStartScan = () => {
