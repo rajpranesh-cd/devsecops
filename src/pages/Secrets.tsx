@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { DashboardCard } from '@/components/dashboard/DashboardCard';
 import { sampleSecretScanResults } from '@/data/sampleData';
@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Search, Download, Eye, EyeOff, RefreshCw, FileKey, Filter } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,9 +19,24 @@ export default function Secrets() {
   const [searchQuery, setSearchQuery] = useState('');
   const [showSecrets, setShowSecrets] = useState(false);
   const [isScanning, setIsScanning] = useState(false);
+  const [scanResults, setScanResults] = useState(sampleSecretScanResults);
+  
+  // GitHub settings
+  const [githubToken, setGithubToken] = useState('');
+  const [githubOrg, setGithubOrg] = useState('');
+  
+  // Load settings on component mount
+  useEffect(() => {
+    // Retrieve settings from localStorage
+    const savedToken = localStorage.getItem('githubToken');
+    const savedOrg = localStorage.getItem('githubOrg');
+    
+    if (savedToken) setGithubToken(savedToken);
+    if (savedOrg) setGithubOrg(savedOrg);
+  }, []);
   
   // Combine all findings from all repositories
-  const allFindings = sampleSecretScanResults.flatMap(repo => repo.findings);
+  const allFindings = scanResults.flatMap(repo => repo.findings);
   
   // Filter findings based on search query
   const filteredFindings = allFindings.filter(finding => 
@@ -30,19 +46,64 @@ export default function Secrets() {
     finding.author.toLowerCase().includes(searchQuery.toLowerCase())
   );
   
-  const handleStartScan = () => {
+  const runSecretScan = async () => {
+    // Check for required credentials
+    if (!githubToken || !githubOrg) {
+      toast.error('GitHub token and organization name are required. Please set them in the Settings page.');
+      return;
+    }
+    
     setIsScanning(true);
-    // Simulate scanning process
-    setTimeout(() => {
+    
+    try {
+      // In a real implementation, this would call an API or run the GitLeaks scan
+      // For this demo, we'll simulate the scanning process
+      toast.info(`Starting scan for organization: ${githubOrg}`);
+      
+      // Simulate the steps of the scanning process with toast notifications
+      setTimeout(() => {
+        toast.info('Discovering repositories...');
+      }, 1000);
+      
+      setTimeout(() => {
+        toast.info('Determining default branches...');
+      }, 2000);
+      
+      setTimeout(() => {
+        toast.info('Cloning/syncing repositories...');
+      }, 3000);
+      
+      setTimeout(() => {
+        toast.info('Running GitLeaks scans...');
+      }, 4000);
+      
+      setTimeout(() => {
+        toast.info('Aggregating results...');
+      }, 5000);
+      
+      // Simulate finding some secrets
+      setTimeout(() => {
+        toast.success('Scanning completed!');
+        // In a real implementation, we would update with real results from the scan
+        setScanResults(sampleSecretScanResults);
+        setIsScanning(false);
+      }, 6000);
+    } catch (error) {
+      console.error('Error during secret scanning:', error);
+      toast.error('An error occurred during scanning');
       setIsScanning(false);
-    }, 3000);
+    }
+  };
+
+  const handleStartScan = () => {
+    runSecretScan();
   };
 
   const handleExport = (format: 'pdf' | 'json' | 'csv') => {
     // In a real implementation, this would generate and download the file
     // For this demo, we'll just show what would happen
     console.log(`Exporting ${filteredFindings.length} secrets in ${format.toUpperCase()} format`);
-    alert(`Exporting ${filteredFindings.length} secrets in ${format.toUpperCase()} format`);
+    toast.success(`Exporting ${filteredFindings.length} secrets in ${format.toUpperCase()} format`);
   };
 
   return (

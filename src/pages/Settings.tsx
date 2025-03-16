@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -26,10 +26,29 @@ export default function Settings() {
   // Scan settings
   const [scanFrequency, setScanFrequency] = useState('daily');
 
+  // Load settings from localStorage on component mount
+  useEffect(() => {
+    const savedToken = localStorage.getItem('githubToken') || '';
+    const savedOrg = localStorage.getItem('githubOrg') || '';
+    const savedUseSampleData = localStorage.getItem('useSampleData');
+    
+    setGithubToken(savedToken);
+    setGithubOrg(savedOrg);
+    
+    if (savedUseSampleData !== null) {
+      setUseSampleData(savedUseSampleData === 'true');
+    }
+  }, []);
+
   const handleSaveSettings = () => {
     setLoading(true);
     
-    // Simulate saving settings
+    // Save settings to localStorage
+    localStorage.setItem('githubToken', githubToken);
+    localStorage.setItem('githubOrg', githubOrg);
+    localStorage.setItem('useSampleData', useSampleData.toString());
+    
+    // Simulate API call to save settings
     setTimeout(() => {
       setLoading(false);
       toast.success('Settings saved successfully');
@@ -37,9 +56,14 @@ export default function Settings() {
   };
 
   const handleTestConnection = () => {
+    if (!githubToken || !githubOrg) {
+      toast.error('GitHub token and organization name are required');
+      return;
+    }
+    
     setTestingConnection(true);
     
-    // Simulate API call to test connection
+    // Simulate API call to test GitHub connection
     setTimeout(() => {
       setTestingConnection(false);
       
@@ -53,6 +77,7 @@ export default function Settings() {
 
   const handleToggleSampleData = (checked: boolean) => {
     setUseSampleData(checked);
+    localStorage.setItem('useSampleData', checked.toString());
     toast.info(checked ? 'Using sample data' : 'Using live data');
   };
 
