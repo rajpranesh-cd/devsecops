@@ -5,7 +5,7 @@ import { DashboardCard } from '@/components/dashboard/DashboardCard';
 import { sampleSecretScanResults } from '@/data/sampleData';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Search, Download, Eye, EyeOff, RefreshCw, FileKey, Filter } from 'lucide-react';
+import { Search, Download, Eye, EyeOff, RefreshCw, FileKey, Filter, ShieldAlert } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import {
@@ -28,15 +28,20 @@ export default function Secrets() {
   
   // Load settings on component mount
   useEffect(() => {
-    // Retrieve settings from localStorage
-    const savedToken = localStorage.getItem('githubToken');
-    const savedOrg = localStorage.getItem('githubOrg');
-    const savedUseSampleData = localStorage.getItem('useSampleData');
-    
-    if (savedToken) setGithubToken(savedToken);
-    if (savedOrg) setGithubOrg(savedOrg);
-    if (savedUseSampleData !== null) {
-      setUseSampleData(savedUseSampleData === 'true');
+    try {
+      // Retrieve settings from localStorage securely
+      const savedToken = localStorage.getItem('githubToken');
+      const savedOrg = localStorage.getItem('githubOrg');
+      const savedUseSampleData = localStorage.getItem('useSampleData');
+      
+      if (savedToken) setGithubToken(savedToken);
+      if (savedOrg) setGithubOrg(savedOrg);
+      if (savedUseSampleData !== null) {
+        setUseSampleData(savedUseSampleData === 'true');
+      }
+    } catch (error) {
+      console.error('Error loading settings:', error);
+      toast.error('Failed to load scan settings');
     }
   }, []);
   
@@ -51,6 +56,38 @@ export default function Secrets() {
     finding.author.toLowerCase().includes(searchQuery.toLowerCase())
   );
   
+  const validateGitHubCredentials = async (token: string, org: string) => {
+    if (!token || !org) {
+      return { valid: false, message: 'GitHub token and organization name are required' };
+    }
+    
+    try {
+      const response = await fetch(`https://api.github.com/orgs/${org}`, {
+        headers: {
+          'Authorization': `token ${token}`,
+          'Accept': 'application/vnd.github.v3+json'
+        }
+      });
+      
+      if (response.ok) {
+        return { valid: true };
+      } else {
+        const data = await response.json();
+        return { 
+          valid: false, 
+          message: `GitHub API error: ${data.message || 'Invalid credentials'}`,
+          statusCode: response.status
+        };
+      }
+    } catch (error) {
+      console.error('Error validating GitHub credentials:', error);
+      return { 
+        valid: false, 
+        message: 'Connection failed: Network error or invalid credentials'
+      };
+    }
+  };
+  
   const runSecretScan = async () => {
     // Don't perform actual scan if using sample data
     if (useSampleData) {
@@ -60,18 +97,33 @@ export default function Secrets() {
     
     // Check for required credentials
     if (!githubToken || !githubOrg) {
-      toast.error('GitHub token and organization name are required. Please set them in the Settings page.');
+      toast.error('GitHub token and organization name are required', {
+        description: 'Please set them in the Settings page or enable Sample Data mode.'
+      });
       return;
     }
     
     setIsScanning(true);
     
     try {
-      // In a real implementation, this would call an API or run the GitLeaks scan
+      // Validate GitHub credentials before attempting scan
+      const credentialCheck = await validateGitHubCredentials(githubToken, githubOrg);
+      
+      if (!credentialCheck.valid) {
+        toast.error('GitHub credential validation failed', {
+          description: credentialCheck.message
+        });
+        setIsScanning(false);
+        return;
+      }
+      
+      // Credentials are valid, proceed with scan
       await simulateRealScan(githubToken, githubOrg);
     } catch (error) {
       console.error('Error during secret scanning:', error);
-      toast.error('An error occurred during scanning');
+      toast.error('An error occurred during scanning', {
+        description: error instanceof Error ? error.message : 'Unknown error'
+      });
     } finally {
       setIsScanning(false);
     }

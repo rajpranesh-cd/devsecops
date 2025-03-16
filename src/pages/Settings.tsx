@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { Button } from '@/components/ui/button';
@@ -8,7 +7,7 @@ import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
 import { DashboardCard } from '@/components/dashboard/DashboardCard';
-import { AlertCircle, Save, TestTube, RefreshCw } from 'lucide-react';
+import { AlertCircle, Save, TestTube, RefreshCw, ShieldAlert } from 'lucide-react';
 
 export default function Settings() {
   const [loading, setLoading] = useState(false);
@@ -28,36 +27,68 @@ export default function Settings() {
 
   // Load settings from localStorage on component mount
   useEffect(() => {
-    const savedToken = localStorage.getItem('githubToken') || '';
-    const savedOrg = localStorage.getItem('githubOrg') || '';
-    const savedUseSampleData = localStorage.getItem('useSampleData');
-    
-    setGithubToken(savedToken);
-    setGithubOrg(savedOrg);
-    
-    if (savedUseSampleData !== null) {
-      setUseSampleData(savedUseSampleData === 'true');
+    try {
+      const savedToken = localStorage.getItem('githubToken') || '';
+      const savedOrg = localStorage.getItem('githubOrg') || '';
+      const savedUseSampleData = localStorage.getItem('useSampleData');
+      
+      setGithubToken(savedToken);
+      setGithubOrg(savedOrg);
+      
+      if (savedUseSampleData !== null) {
+        setUseSampleData(savedUseSampleData === 'true');
+      }
+    } catch (error) {
+      console.error('Error loading settings:', error);
+      toast.error('Failed to load saved settings');
     }
   }, []);
+
+  const securelyStoreCredentials = (key: string, value: string) => {
+    try {
+      localStorage.setItem(key, value);
+      return true;
+    } catch (error) {
+      console.error(`Error storing ${key}:`, error);
+      return false;
+    }
+  };
 
   const handleSaveSettings = () => {
     setLoading(true);
     
-    // Save settings to localStorage
-    localStorage.setItem('githubToken', githubToken);
-    localStorage.setItem('githubOrg', githubOrg);
-    localStorage.setItem('useSampleData', useSampleData.toString());
+    const credentialsValid = githubToken && githubOrg;
     
-    // Simulate API call to save settings
-    setTimeout(() => {
+    if (!credentialsValid && !useSampleData) {
+      toast.warning('GitHub credentials are required for live scanning', {
+        description: 'Please provide valid credentials or enable sample data mode.'
+      });
+    }
+    
+    const githubSaved = securelyStoreCredentials('githubToken', githubToken);
+    const orgSaved = securelyStoreCredentials('githubOrg', githubOrg);
+    const sampleDataSaved = securelyStoreCredentials('useSampleData', useSampleData.toString());
+    
+    if (githubSaved && orgSaved && sampleDataSaved) {
+      setTimeout(() => {
+        setLoading(false);
+        toast.success('Settings saved successfully');
+      }, 1000);
+    } else {
       setLoading(false);
-      toast.success('Settings saved successfully');
-    }, 1000);
+      toast.error('Failed to save some settings');
+    }
   };
 
   const validateGitHubCredentials = async (token: string, org: string) => {
+    if (!token || !org) {
+      return { 
+        valid: false, 
+        message: 'GitHub token and organization name are required' 
+      };
+    }
+    
     try {
-      // Make a call to GitHub API to validate the token and org
       const response = await fetch(`https://api.github.com/orgs/${org}`, {
         headers: {
           'Authorization': `token ${token}`,
@@ -65,20 +96,34 @@ export default function Settings() {
         }
       });
       
+      const data = await response.json();
+      
       if (response.ok) {
-        return { valid: true, message: 'Connection to GitHub successful' };
+        if (data.login && data.id) {
+          return { 
+            valid: true, 
+            message: `Successfully connected to GitHub organization: ${data.login}`,
+            orgName: data.name || data.login
+          };
+        } else {
+          return { 
+            valid: false, 
+            message: 'Invalid response from GitHub API'
+          };
+        }
       } else {
-        const data = await response.json();
         return { 
           valid: false, 
-          message: `Connection failed: ${data.message || 'Invalid credentials'}` 
+          message: `Connection failed: ${data.message || 'Invalid credentials'}`,
+          statusCode: response.status
         };
       }
     } catch (error) {
       console.error('Error validating GitHub credentials:', error);
       return { 
         valid: false, 
-        message: 'Connection failed: Network error or invalid credentials' 
+        message: 'Connection failed: Network error or invalid credentials',
+        error: error instanceof Error ? error.message : 'Unknown error'
       };
     }
   };
@@ -95,9 +140,23 @@ export default function Settings() {
       const result = await validateGitHubCredentials(githubToken, githubOrg);
       
       if (result.valid) {
-        toast.success(result.message);
+        toast.success(result.message, {
+          description: `Organization: ${result.orgName || githubOrg}`
+        });
       } else {
-        toast.error(result.message);
+        if (result.statusCode === 401) {
+          toast.error('Authentication failed', {
+            description: 'Your GitHub token is invalid or has expired.'
+          });
+        } else if (result.statusCode === 404) {
+          toast.error('Organization not found', {
+            description: `The organization "${githubOrg}" could not be found.`
+          });
+        } else {
+          toast.error(result.message, {
+            description: result.error ? `Error: ${result.error}` : undefined
+          });
+        }
       }
     } catch (error) {
       console.error('Error testing connection:', error);
@@ -110,7 +169,14 @@ export default function Settings() {
   const handleToggleSampleData = (checked: boolean) => {
     setUseSampleData(checked);
     localStorage.setItem('useSampleData', checked.toString());
-    toast.info(checked ? 'Using sample data' : 'Using live data');
+    
+    if (!checked && (!githubToken || !githubOrg)) {
+      toast.warning('GitHub credentials required for live scanning', {
+        description: 'Please provide valid GitHub credentials.'
+      });
+    } else {
+      toast.info(checked ? 'Using sample data' : 'Using live data');
+    }
   };
 
   return (
