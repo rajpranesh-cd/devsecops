@@ -1,6 +1,5 @@
 
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
-import { DashboardCard } from './DashboardCard';
 
 interface SeverityPieChartProps {
   data: {
