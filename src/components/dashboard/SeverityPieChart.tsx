@@ -15,16 +15,16 @@ interface SeverityPieChartProps {
 
 export function SeverityPieChart({ data, className, style }: SeverityPieChartProps) {
   const chartData = [
-    { name: 'Critical', value: data.critical, color: 'hsl(var(--severity-critical))' },
-    { name: 'High', value: data.high, color: 'hsl(var(--severity-high))' },
-    { name: 'Medium', value: data.medium, color: 'hsl(var(--severity-medium))' },
-    { name: 'Low', value: data.low, color: 'hsl(var(--severity-low))' },
+    { name: 'Critical', value: data.critical, color: 'var(--severity-critical)' },
+    { name: 'High', value: data.high, color: 'var(--severity-high)' },
+    { name: 'Medium', value: data.medium, color: 'var(--severity-medium)' },
+    { name: 'Low', value: data.low, color: 'var(--severity-low)' },
   ];
 
   const totalIssues = chartData.reduce((sum, item) => sum + item.value, 0);
 
   return (
-    <DashboardCard title="Vulnerabilities by Severity" className={className} style={style}>
+    <div className={className} style={style}>
       <div className="h-[300px] relative">
         <div className="absolute inset-0 flex items-center justify-center flex-col">
           <span className="text-3xl font-bold">{totalIssues}</span>
@@ -53,7 +53,7 @@ export function SeverityPieChart({ data, className, style }: SeverityPieChartPro
                   key={`cell-${index}`} 
                   fill={entry.color} 
                   strokeWidth={2}
-                  stroke="hsl(var(--background))"
+                  stroke="var(--background)"
                   className="animate-scale-in"
                   style={{ animationDelay: `${index * 100}ms` }}
                 />
@@ -95,6 +95,6 @@ export function SeverityPieChart({ data, className, style }: SeverityPieChartPro
           </PieChart>
         </ResponsiveContainer>
       </div>
-    </DashboardCard>
+    </div>
   );
 }

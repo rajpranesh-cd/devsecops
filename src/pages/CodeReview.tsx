@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { DashboardCard } from '@/components/dashboard/DashboardCard';
@@ -730,13 +729,12 @@ export default function CodeReview() {
                 <DashboardCard title="Severity Distribution">
                   <div className="h-64">
                     <SeverityPieChart 
-                      data={[
-                        { name: 'Critical', value: codeReviewSummary.severityCounts.Critical, color: 'var(--severity-critical)' },
-                        { name: 'High', value: codeReviewSummary.severityCounts.High, color: 'var(--severity-high)' },
-                        { name: 'Medium', value: codeReviewSummary.severityCounts.Medium, color: 'var(--severity-medium)' },
-                        { name: 'Low', value: codeReviewSummary.severityCounts.Low, color: 'var(--severity-low)' },
-                        { name: 'Info', value: codeReviewSummary.severityCounts.Info, color: '#6e56cf' }
-                      ]}
+                      data={{
+                        critical: codeReviewSummary.severityCounts.Critical,
+                        high: codeReviewSummary.severityCounts.High,
+                        medium: codeReviewSummary.severityCounts.Medium,
+                        low: codeReviewSummary.severityCounts.Low
+                      }}
                     />
                   </div>
                 </DashboardCard>
@@ -744,12 +742,12 @@ export default function CodeReview() {
                 <DashboardCard title="Category Distribution">
                   <div className="h-64">
                     <SeverityPieChart 
-                      data={[
-                        { name: 'Security', value: codeReviewSummary.categoryCounts.Security, color: 'var(--severity-high)' },
-                        { name: 'Quality', value: codeReviewSummary.categoryCounts.Quality, color: '#3b82f6' },
-                        { name: 'Performance', value: codeReviewSummary.categoryCounts.Performance, color: '#f59e0b' },
-                        { name: 'Maintainability', value: codeReviewSummary.categoryCounts.Maintainability, color: '#8b5cf6' }
-                      ]}
+                      data={{
+                        critical: codeReviewSummary.categoryCounts.Security,
+                        high: codeReviewSummary.categoryCounts.Quality,
+                        medium: codeReviewSummary.categoryCounts.Performance,
+                        low: codeReviewSummary.categoryCounts.Maintainability
+                      }}
                     />
                   </div>
                 </DashboardCard>
@@ -773,11 +771,11 @@ export default function CodeReview() {
                       </h4>
                       <ul className="space-y-2 text-sm text-muted-foreground">
                         <li className="flex items-start">
-                          <Bug className="h-4 w-4 mr-2 mt-0.5 text-severity-critical" />
+                          <AlertTriangle className="h-4 w-4 mr-2 mt-0.5 text-severity-critical" />
                           <span>Detected {codeReviewSummary.severityCounts.Critical} critical security vulnerabilities requiring immediate attention</span>
                         </li>
                         <li className="flex items-start">
-                          <ShieldAlert className="h-4 w-4 mr-2 mt-0.5 text-severity-high" />
+                          <AlertTriangle className="h-4 w-4 mr-2 mt-0.5 text-severity-high" />
                           <span>Identified potential injection vulnerabilities in API endpoints</span>
                         </li>
                         <li className="flex items-start">
@@ -802,7 +800,7 @@ export default function CodeReview() {
                           <span>Documentation is inconsistent across repositories</span>
                         </li>
                         <li className="flex items-start">
-                          <Activity className="h-4 w-4 mr-2 mt-0.5 text-amber-500" />
+                          <AlertTriangle className="h-4 w-4 mr-2 mt-0.5 text-amber-500" />
                           <span>Performance bottlenecks in database queries and API requests</span>
                         </li>
                       </ul>
@@ -848,7 +846,7 @@ export default function CodeReview() {
                   
                   <div className="p-4 rounded-lg border border-severity-high/20 bg-severity-high/5">
                     <h3 className="text-lg font-medium text-severity-high mb-2 flex items-center">
-                      <ShieldAlert className="h-5 w-5 mr-2" />
+                      <AlertTriangle className="h-5 w-5 mr-2" />
                       High Priority Actions
                     </h3>
                     <ul className="space-y-3">
@@ -916,3 +914,4 @@ export default function CodeReview() {
     </div>
   );
 }
+
