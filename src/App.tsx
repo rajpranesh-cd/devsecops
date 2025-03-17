@@ -13,6 +13,7 @@ import SBOM from './pages/SBOM';
 import SupplyChain from './pages/SupplyChain';
 import Settings from './pages/Settings';
 import Integration from './pages/Integration';
+import CodeReview from './pages/CodeReview';
 import { ThemeProvider } from './contexts/ThemeContext';
 
 function App() {
@@ -53,6 +54,10 @@ const router = createBrowserRouter([
   {
     path: "/supply-chain",
     element: <SupplyChain />,
+  },
+  {
+    path: "/code-review",
+    element: <CodeReview />,
   },
   {
     path: "/settings",
